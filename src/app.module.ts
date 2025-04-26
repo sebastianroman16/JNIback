@@ -1,4 +1,5 @@
 // @ts-nocheck
+import * as crypto from 'crypto';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
