@@ -7,19 +7,37 @@ import { IntegrantesModule } from './integrantes/integrantes.module';
 import { GruposModule } from './grupos/grupos.module';
 import { ReunionesModule } from './reuniones/reuniones.module';
 
-
 @Module({
   imports: [
     ConfigModule.forRoot(),
-    TypeOrmModule.forRoot({
-      type: 'postgres',
-      host: process.env.DB_HOST,
-      port: +process.env.DB_PORT,
-      database: process.env.DB_NAME,
-      username: process.env.DB_USERNAME,
-      password: process.env.DB_PASSWORD,
-      autoLoadEntities: true,
-      synchronize: true,
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: () => {
+        const isProduction = process.env.DATABASE_URL ? true : false;
+
+        if (isProduction) {
+          // Estamos en Railway (producción)
+          return {
+            type: 'postgres',
+            url: process.env.DATABASE_URL,
+            ssl: { rejectUnauthorized: false },
+            autoLoadEntities: true,
+            synchronize: true,
+          };
+        } else {
+          // Estamos en desarrollo (local)
+          return {
+            type: 'postgres',
+            host: process.env.DB_HOST,
+            port: +process.env.DB_PORT,
+            username: process.env.DB_USERNAME,
+            password: process.env.DB_PASSWORD,
+            database: process.env.DB_NAME,
+            autoLoadEntities: true,
+            synchronize: true,
+          };
+        }
+      },
     }),
     AuthModule,
     IntegrantesModule,
